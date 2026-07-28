@@ -790,11 +790,11 @@ export default function AngkorPreviewPage() {
           top: 0;
           left: 0;
           z-index: 2;
-          width: 112px;
-          height: 54px;
+          width: 126px;
+          height: 82px;
           background:
-            linear-gradient(135deg, rgba(0, 0, 0, 0.96), rgba(0, 0, 0, 0.74) 64%, transparent),
-            radial-gradient(circle at 22px 20px, rgba(0, 0, 0, 0.92), transparent 38px);
+            linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(0, 0, 0, 0.92) 56%, rgba(0, 0, 0, 0.42) 78%, transparent),
+            radial-gradient(circle at 28px 26px, rgba(0, 0, 0, 0.98), transparent 54px);
           pointer-events: none;
         }
 
