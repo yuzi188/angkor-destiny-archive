@@ -7,92 +7,124 @@ const video = "/videos/angkor/";
 
 const freePreviewPanels = [
   {
-    image: "01-clean-identity.png",
+    image: "09-title-seen.png",
     no: "09",
-    kicker: "角色開場",
-    title: "Rin 看著你",
-    lines: ["你不是沒有方向。", "只是每次快靠近答案時，你先替自己找了退路。"],
-    tone: "dark",
+    kicker: "第一章",
+    title: "被看見的那一面",
+    lines: ["Rin 坐在車廂陰影裡。", "第一頁，準備翻開。"],
+    tone: "title",
   },
   {
-    image: "02-clean-register-ticket.png",
-    no: "10",
-    kicker: "乘客資料",
-    title: "DESTINY RECORD",
-    lines: ["姓名、生日、出生地、出生時間。", "乘客資料已確認。"],
-    tone: "record",
-  },
-  {
-    image: "04-clean-archive-book.png",
-    no: "11",
+    image: "09-story-open-book.png",
+    no: "09-A",
     kicker: "翻頁",
     title: "第一頁，不是答案。",
-    lines: ["是你一直避開的那一面。"],
-    tone: "dark",
+    lines: ["它只是把你一直避開的地方，放到燈下。"],
+    tone: "story",
   },
   {
-    image: "05-clean-preview-page-1.png",
-    no: "12",
-    kicker: "第一頁",
-    title: "被看見的那一面",
-    lines: ["你外在很穩。", "但心裡一直在衡量。", "你先看局勢，再決定要不要靠近。", "這不是冷淡，是你保護自己的方式。"],
+    image: "09-story-window-reflection.png",
+    no: "09-B",
+    kicker: "倒影",
+    title: "是你一直避開的那一面。",
+    lines: ["窗外掠過的神廟，不只在外面。"],
+    tone: "story",
+  },
+  {
+    image: "09-book-result.png",
+    no: "09-C",
+    kicker: "書面分析",
+    title: "第一頁｜被看見的那一面",
+    lines: ["你外在看起來很穩。", "但心裡其實一直在衡量。", "你不是沒有方向。", "你只是習慣先替自己留退路。"],
     tone: "book",
   },
   {
-    image: "01-clean-identity.png",
-    no: "13",
-    kicker: "Rin 插話",
-    title: "你不是不想前進。",
-    lines: ["你只是太怕選錯之後，沒有人替你收拾。"],
-    tone: "dark",
+    image: "10-title-repeat.png",
+    no: "10",
+    kicker: "第二章",
+    title: "反覆出現的選擇",
+    lines: ["三條軌道亮起。", "同一個問題，換了入口回來。"],
+    tone: "title",
   },
   {
-    image: "07-clean-preview-page-3.png",
-    no: "14",
-    kicker: "第二頁",
-    title: "反覆出現的選擇",
+    image: "10-story-ticket-lines.png",
+    no: "10-A",
+    kicker: "票孔發光",
+    title: "你以為是新的問題。",
+    lines: ["其實只是同一條路線，換了入口。"],
+    tone: "story",
+  },
+  {
+    image: "10-story-loop-station.png",
+    no: "10-B",
+    kicker: "迴圈車站",
+    title: "你不是卡住。",
+    lines: ["你只是還沒看清，自己反覆選了什麼。"],
+    tone: "story",
+  },
+  {
+    image: "10-book-result.png",
+    no: "10-C",
+    kicker: "書面分析",
+    title: "第二頁｜反覆出現的選擇",
     lines: ["工作裡，你先承擔。", "關係裡，你先觀察。", "人生裡，你總是晚一點相信自己。"],
     tone: "book",
   },
   {
-    image: "03-clean-loading-analysis.png",
-    no: "15",
-    kicker: "三線交會",
-    title: "這不是一句安慰。",
-    lines: ["你的紀錄裡，本來就有這條軌道。"],
-    tone: "dark",
-  },
-  {
-    image: "08-clean-preview-page-4.png",
-    no: "16",
-    kicker: "第三頁",
+    image: "11-title-code.png",
+    no: "11",
+    kicker: "第三章",
     title: "命格暗號",
-    lines: ["你的命格：開路者。", "你習慣先走進壓力。", "你需要被看見，也害怕失控。", "你逃開的問題，剛好落在同一個選擇。"],
-    tone: "book",
+    lines: ["懷錶、車票與書本，三條線在桌面交會。"],
+    tone: "title",
   },
   {
-    image: "09-clean-sealed-pages.png",
-    no: "17",
-    kicker: "封印前",
-    title: "免費預覽，到這裡剛好。",
-    lines: ["真正會改變選擇的，是後面的班次。"],
-    tone: "dark",
+    image: "11-story-symbol.png",
+    no: "11-A",
+    kicker: "符號浮現",
+    title: "這不是一句安慰。",
+    lines: ["它是你紀錄裡，早就留下的軌道。"],
+    tone: "story",
   },
   {
-    image: "09-clean-sealed-pages.png",
-    no: "18",
-    kicker: "尚未開封的頁面",
-    title: "列車仍在前行",
-    lines: ["第七章｜關係迴圈的觸發點", "第八章｜界線與靠近的時機", "第九章｜承擔者的轉向密語"],
+    image: "11-story-seal-touch.png",
+    no: "11-B",
+    kicker: "封印線",
+    title: "你的紀錄裡，本來就有這條軌道。",
+    lines: ["只是你一直把它當成偶然。"],
+    tone: "story",
+  },
+  {
+    image: "11-book-result.png",
+    no: "11-C",
+    kicker: "書面分析",
+    title: "第三頁｜命格暗號",
+    lines: ["你的命格：開路者。", "你擅長先承擔壓力。", "也容易把需求藏起來。", "真正的轉向，是學會讓別人看見你。"],
+    tone: "book-dark",
+  },
+  {
+    image: "12-title-locked.png",
+    no: "12",
+    kicker: "封印頁",
+    title: "尚未開封的頁面",
+    lines: ["免費預覽，到這裡剛好。"],
     tone: "locked",
   },
   {
-    image: "01-clean-identity.png",
-    no: "19",
+    image: "12-locked-chapters.png",
+    no: "12-A",
+    kicker: "後續章節",
+    title: "列車仍在前行",
+    lines: ["第七章｜關係迴圈的觸發點", "第八章｜界線與靠近的時機", "第九章｜承擔者的轉向密語"],
+    tone: "locked-list",
+  },
+  {
+    image: "13-rin-offer.png",
+    no: "13",
     kicker: "Rin 收尾",
     title: "完整班次表在我手上。",
     lines: ["要不要看看，下一站會把你帶去哪？"],
-    tone: "dark",
+    tone: "offer",
   },
 ];
 
@@ -1116,21 +1148,31 @@ export default function AngkorPreviewPage() {
         }
 
         .free-preview-card {
-          min-height: 100dvh;
+          min-height: auto;
+          aspect-ratio: 16 / 9;
           border: 0;
         }
 
+        .free-preview-card.tone-book,
+        .free-preview-card.tone-book-dark {
+          aspect-ratio: 4 / 5;
+        }
+
         .free-preview-card img {
-          filter: brightness(0.72) contrast(1.1);
+          filter: brightness(0.7) contrast(1.1);
         }
 
-        .free-preview-card.tone-book img,
-        .free-preview-card.tone-record img {
-          filter: brightness(0.96) contrast(1.04);
+        .free-preview-card.tone-book img {
+          filter: brightness(1.02) contrast(1.04);
         }
 
-        .free-preview-card.tone-locked img {
-          filter: brightness(0.54) contrast(1.12);
+        .free-preview-card.tone-book-dark img {
+          filter: brightness(0.82) contrast(1.08);
+        }
+
+        .free-preview-card.tone-locked img,
+        .free-preview-card.tone-locked-list img {
+          filter: brightness(0.56) contrast(1.12);
         }
 
         .free-preview-card::after {
@@ -1140,6 +1182,7 @@ export default function AngkorPreviewPage() {
         }
 
         .free-preview-card.tone-book::after,
+        .free-preview-card.tone-book-dark::after,
         .free-preview-card.tone-record::after {
           background: linear-gradient(180deg, rgba(5, 6, 7, 0.08), transparent 24%, rgba(5, 6, 7, 0.22) 72%, rgba(5, 6, 7, 0.78));
         }
@@ -1155,22 +1198,29 @@ export default function AngkorPreviewPage() {
         }
 
         .tone-book .free-preview-copy,
+        .tone-book-dark .free-preview-copy,
         .tone-record .free-preview-copy {
-          left: 14%;
-          right: 14%;
-          top: 18%;
+          left: 13%;
+          right: 13%;
+          top: 13%;
           bottom: auto;
           text-align: center;
           color: #1b120c;
           text-shadow: 0 1px 0 rgba(255, 246, 226, 0.45);
         }
 
+        .tone-book-dark .free-preview-copy {
+          color: rgba(255, 246, 234, 0.92);
+          text-shadow: 0 4px 22px rgba(0, 0, 0, 0.9);
+        }
+
         .tone-record .free-preview-copy {
           top: 14%;
         }
 
-        .tone-locked .free-preview-copy {
-          top: 18%;
+        .tone-locked .free-preview-copy,
+        .tone-locked-list .free-preview-copy {
+          top: 16%;
           bottom: auto;
           text-align: center;
         }
@@ -1181,6 +1231,7 @@ export default function AngkorPreviewPage() {
         }
 
         .tone-book .free-preview-copy small,
+        .tone-book-dark .free-preview-copy small,
         .tone-record .free-preview-copy small {
           color: #9c2923;
         }
@@ -1192,9 +1243,14 @@ export default function AngkorPreviewPage() {
         }
 
         .tone-book .free-preview-copy h2,
+        .tone-book-dark .free-preview-copy h2,
         .tone-record .free-preview-copy h2 {
           color: #9c2923;
           font-size: 28px;
+        }
+
+        .tone-book-dark .free-preview-copy h2 {
+          color: #d8b36d;
         }
 
         .tone-locked .free-preview-copy h2 {
@@ -1209,10 +1265,15 @@ export default function AngkorPreviewPage() {
         }
 
         .tone-book .free-preview-copy p,
+        .tone-book-dark .free-preview-copy p,
         .tone-record .free-preview-copy p {
           color: #21160f;
           font-size: 18px;
           line-height: 1.7;
+        }
+
+        .tone-book-dark .free-preview-copy p {
+          color: rgba(255, 246, 234, 0.9);
         }
 
         .float-button {
