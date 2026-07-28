@@ -190,6 +190,8 @@ const introSequence = [
   },
 ];
 
+const introCutoffs = [5, 14.5, 14.5];
+
 const analysisSequence = [
   {
     src: "04-waiting-analysis-a.mp4",
@@ -248,7 +250,8 @@ function IntroSequence({ onDone }: { onDone: () => void }) {
         playsInline
         preload="auto"
         onTimeUpdate={(event) => {
-          if (index === 0 && event.currentTarget.currentTime >= 5) {
+          const cutoff = introCutoffs[index];
+          if (cutoff && event.currentTarget.currentTime >= cutoff) {
             goNext();
           }
         }}
