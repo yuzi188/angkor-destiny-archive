@@ -435,6 +435,47 @@ export default function AngkorPreviewPage() {
       });
   }
 
+
+  const progressValue = !started
+    ? 4
+    : analysisDone
+      ? 100
+      : analysisStarted
+        ? resultReady
+          ? 84
+          : 72
+        : introDone
+          ? 44
+          : 18;
+
+  function resetJourney() {
+    setStarted(false);
+    setIntroDone(false);
+    setAnalysisStarted(false);
+    setAnalysisTransitioning(false);
+    setAnalysisDone(false);
+    setResultReady(false);
+    setSubmitError("");
+  }
+
+  function goBackSegment() {
+    if (analysisStarted) {
+      setAnalysisStarted(false);
+      setAnalysisTransitioning(false);
+      setAnalysisDone(false);
+      setResultReady(false);
+      return;
+    }
+
+    if (introDone) {
+      setIntroDone(false);
+      return;
+    }
+
+    if (started) {
+      setStarted(false);
+    }
+  }
   return (
     <main
       className={`angkor-preview ${started ? "is-started" : "is-cover"} ${
@@ -446,8 +487,15 @@ export default function AngkorPreviewPage() {
       <div className="phone">
         {analysisTransitioning ? <div className="submit-transition-shade" /> : null}
         <div className="topbar">
-          <span>Angkor Midnight Archive</span>
-          <b>預覽版</b>
+          <button className="nav-icon" type="button" onClick={goBackSegment} aria-label="返回上段">
+            ‹
+          </button>
+          <div className="story-progress" aria-hidden="true">
+            <i style={{ width: `${progressValue}%` }} />
+          </div>
+          <button className="nav-icon" type="button" onClick={resetJourney} aria-label="回首頁">
+            ⌂
+          </button>
         </div>
 
         <Panel image="01-cover-ticket-visible.png" className="cover-panel">
@@ -671,6 +719,12 @@ export default function AngkorPreviewPage() {
           color: #fff6ea;
         }
 
+        .is-form.is-before-analysis {
+          height: 100svh;
+          min-height: 100svh;
+          overflow: hidden;
+        }
+
         .phone {
           position: relative;
           width: min(100vw, 430px);
@@ -700,17 +754,54 @@ export default function AngkorPreviewPage() {
         }
 
         .topbar {
-          position: sticky;
+          position: fixed;
           top: 0;
+          left: 50%;
+          width: min(100vw, 430px);
+          transform: translateX(-50%);
           z-index: 20;
           display: flex;
-          justify-content: space-between;
-          padding: 12px 16px;
-          background: rgba(5, 6, 7, 0.88);
-          border-bottom: 1px solid rgba(255, 246, 234, 0.12);
-          backdrop-filter: blur(14px);
+          align-items: center;
+          gap: 14px;
+          padding: calc(env(safe-area-inset-top) + 14px) 20px 10px;
+          background: linear-gradient(180deg, rgba(5, 6, 7, 0.86), rgba(5, 6, 7, 0.08));
           color: rgba(255, 246, 234, 0.72);
           font-size: 12px;
+          pointer-events: none;
+        }
+
+        .nav-icon {
+          width: 44px;
+          height: 44px;
+          min-height: 44px;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(255, 246, 234, 0.18);
+          border-radius: 9px;
+          background: rgba(5, 6, 7, 0.48);
+          color: #fff6ea;
+          font: 900 25px/1 Georgia, "Times New Roman", serif;
+          backdrop-filter: blur(14px);
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+          pointer-events: auto;
+          touch-action: manipulation;
+        }
+
+        .story-progress {
+          flex: 1;
+          height: 5px;
+          overflow: hidden;
+          border-radius: 999px;
+          background: rgba(255, 246, 234, 0.17);
+          box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18) inset;
+        }
+
+        .story-progress i {
+          display: block;
+          height: 100%;
+          border-radius: inherit;
+          background: linear-gradient(90deg, #82c7f1, #d8b36d 58%, #df584e);
+          transition: width 420ms ease;
         }
 
         .topbar b,
@@ -969,10 +1060,14 @@ export default function AngkorPreviewPage() {
         }
 
         .register-card {
-          position: absolute;
-          left: 22px;
-          right: 22px;
-          bottom: 28px;
+          position: fixed;
+          left: 50%;
+          top: 48%;
+          width: min(386px, calc(100vw - 44px));
+          max-height: min(620px, calc(100svh - 112px));
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          transform: translate(-50%, -50%);
           display: grid;
           gap: 10px;
           padding: 15px;
@@ -981,6 +1076,7 @@ export default function AngkorPreviewPage() {
           background: rgba(5, 6, 7, 0.62);
           backdrop-filter: blur(12px);
           box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+          -webkit-overflow-scrolling: touch;
         }
 
         .register-card label {
@@ -1005,13 +1101,14 @@ export default function AngkorPreviewPage() {
           background: rgba(6, 8, 9, 0.76);
           color: #fff6ea;
           padding: 10px 11px;
-          font: 800 13px/1.35 "Noto Serif TC", serif;
+          font: 800 16px/1.35 "Noto Serif TC", serif;
           outline: none;
+          touch-action: manipulation;
         }
 
         .register-card textarea {
-          min-height: 64px;
-          resize: vertical;
+          min-height: 72px;
+          resize: none;
         }
 
         .register-card input:focus,
