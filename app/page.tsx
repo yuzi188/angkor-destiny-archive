@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FocusEvent, type FormEvent, useEffect, useRef, useState } from "react";
 
 const bg = "/storyboards/angkor/";
 const video = "/videos/angkor/";
@@ -193,6 +193,8 @@ function VideoPanel({
         playsInline
         loop={loop}
         preload="metadata"
+        controlsList="nodownload noplaybackrate noremoteplayback"
+        disablePictureInPicture
       />
       <div className="video-caption">
         <p>{note}</p>
@@ -245,7 +247,7 @@ const analysisSequence = [
   },
 ];
 
-function IntroSequence({ onDone }: { onDone: () => void }) {
+function IntroSequence({ muted, onDone }: { muted: boolean; onDone: () => void }) {
   const [index, setIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
@@ -279,8 +281,11 @@ function IntroSequence({ onDone }: { onDone: () => void }) {
         ref={ref}
         src={`${video}${current.src}`}
         autoPlay
+        muted={muted}
         playsInline
         preload="auto"
+        controlsList="nodownload noplaybackrate noremoteplayback"
+        disablePictureInPicture
         onTimeUpdate={(event) => {
           const cutoff = introCutoffs[index];
           if (cutoff && event.currentTarget.currentTime >= cutoff) {
@@ -300,7 +305,15 @@ function IntroSequence({ onDone }: { onDone: () => void }) {
   );
 }
 
-function AnalysisSequence({ resultReady, onDone }: { resultReady: boolean; onDone: () => void }) {
+function AnalysisSequence({
+  muted,
+  resultReady,
+  onDone,
+}: {
+  muted: boolean;
+  resultReady: boolean;
+  onDone: () => void;
+}) {
   const [index, setIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
@@ -322,10 +335,12 @@ function AnalysisSequence({ resultReady, onDone }: { resultReady: boolean; onDon
         ref={ref}
         src={`${video}${inLoop ? "07-waiting-watch-loop.mp4" : current.src}`}
         autoPlay
-        muted
+        muted={muted}
         playsInline
         loop={inLoop && !resultReady}
         preload="auto"
+        controlsList="nodownload noplaybackrate noremoteplayback"
+        disablePictureInPicture
         onEnded={() => {
           if (!inLoop && index < analysisSequence.length - 1) {
             setTransitioning(true);
@@ -368,6 +383,7 @@ function AnalysisSequence({ resultReady, onDone }: { resultReady: boolean; onDon
 
 export default function AngkorPreviewPage() {
   const [started, setStarted] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [analysisTransitioning, setAnalysisTransitioning] = useState(false);
   const [analysisStarted, setAnalysisStarted] = useState(false);
@@ -393,6 +409,34 @@ export default function AngkorPreviewPage() {
   function updateForm(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
   }
+
+  function keepFieldInCard(event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    window.setTimeout(() => {
+      const field = event.currentTarget;
+      const card = field.closest(".register-card");
+      if (!(card instanceof HTMLElement)) return;
+      const targetTop = field.offsetTop - card.clientHeight * 0.35;
+      card.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+    }, 80);
+  }
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const activeViewport = viewport;
+
+    function syncViewportHeight() {
+      document.documentElement.style.setProperty("--app-vvh", `${activeViewport.height}px`);
+    }
+
+    syncViewportHeight();
+    activeViewport.addEventListener("resize", syncViewportHeight);
+    activeViewport.addEventListener("scroll", syncViewportHeight);
+    return () => {
+      activeViewport.removeEventListener("resize", syncViewportHeight);
+      activeViewport.removeEventListener("scroll", syncViewportHeight);
+    };
+  }, []);
 
   function submitPassengerRecord(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -450,6 +494,7 @@ export default function AngkorPreviewPage() {
 
   function resetJourney() {
     setStarted(false);
+    setSoundEnabled(false);
     setIntroDone(false);
     setAnalysisStarted(false);
     setAnalysisTransitioning(false);
@@ -507,6 +552,7 @@ export default function AngkorPreviewPage() {
               className="ticket-start-button"
               type="button"
               onClick={() => {
+                setSoundEnabled(true);
                 setStarted(true);
                 setIntroDone(false);
               }}
@@ -517,7 +563,7 @@ export default function AngkorPreviewPage() {
           </div>
         </Panel>
 
-        {started && !introDone ? <IntroSequence onDone={() => setIntroDone(true)} /> : null}
+        {started && !introDone ? <IntroSequence muted={!soundEnabled} onDone={() => setIntroDone(true)} /> : null}
 
         <VideoPanel
           src="01-cover-opening.mp4"
@@ -571,6 +617,7 @@ export default function AngkorPreviewPage() {
               <input
                 value={form.name}
                 onChange={(event) => updateForm("name", event.target.value)}
+                onFocus={keepFieldInCard}
                 placeholder="Guan-Yu Lai"
               />
             </label>
@@ -579,6 +626,7 @@ export default function AngkorPreviewPage() {
               <input
                 value={form.birth}
                 onChange={(event) => updateForm("birth", event.target.value)}
+                onFocus={keepFieldInCard}
                 placeholder="1996/04/28"
                 inputMode="numeric"
               />
@@ -588,6 +636,7 @@ export default function AngkorPreviewPage() {
               <input
                 value={form.time}
                 onChange={(event) => updateForm("time", event.target.value)}
+                onFocus={keepFieldInCard}
                 placeholder="13:15，可空白"
                 inputMode="numeric"
               />
@@ -597,6 +646,7 @@ export default function AngkorPreviewPage() {
               <input
                 value={form.birthplace}
                 onChange={(event) => updateForm("birthplace", event.target.value)}
+                onFocus={keepFieldInCard}
                 placeholder="Phnom Penh / 嘉義 / 台中"
               />
             </label>
@@ -605,6 +655,7 @@ export default function AngkorPreviewPage() {
               <textarea
                 value={form.concern}
                 onChange={(event) => updateForm("concern", event.target.value)}
+                onFocus={keepFieldInCard}
                 placeholder="你最近最想逃開的問題"
               />
             </label>
@@ -613,6 +664,7 @@ export default function AngkorPreviewPage() {
               <input
                 value={form.email}
                 onChange={(event) => updateForm("email", event.target.value)}
+                onFocus={keepFieldInCard}
                 placeholder="example@mail.com"
                 type="email"
               />
@@ -625,7 +677,7 @@ export default function AngkorPreviewPage() {
         </Panel>
 
         {analysisStarted && !analysisDone ? (
-          <AnalysisSequence resultReady={resultReady} onDone={() => setAnalysisDone(true)} />
+          <AnalysisSequence muted={!soundEnabled} resultReady={resultReady} onDone={() => setAnalysisDone(true)} />
         ) : null}
 
         <Panel image="04-temple-station-awakens.png" className="storyboard-only">
@@ -720,14 +772,15 @@ export default function AngkorPreviewPage() {
         }
 
         .is-form.is-before-analysis {
-          height: 100svh;
-          min-height: 100svh;
+          height: var(--app-vvh, 100svh);
+          min-height: var(--app-vvh, 100svh);
           overflow: hidden;
         }
 
         .phone {
           position: relative;
           width: min(100vw, 430px);
+          min-height: var(--app-vvh, 100svh);
           background: #050607;
           box-shadow: 0 0 80px rgba(0, 0, 0, 0.7);
         }
@@ -865,7 +918,7 @@ export default function AngkorPreviewPage() {
 
         .video-panel video {
           width: 100%;
-          min-height: 100dvh;
+          min-height: var(--app-vvh, 100dvh);
           max-height: none;
           aspect-ratio: 9 / 16;
           object-fit: cover;
@@ -873,19 +926,21 @@ export default function AngkorPreviewPage() {
           border-radius: 0;
           background: #000;
           box-shadow: none;
+          pointer-events: none;
         }
 
-        .video-panel::before {
+        .video-panel::before,
+        .cover-panel::before {
           content: "";
           position: absolute;
           top: 0;
           left: 0;
           z-index: 2;
-          width: 126px;
-          height: 82px;
+          width: 150px;
+          height: 106px;
           background:
-            linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(0, 0, 0, 0.92) 56%, rgba(0, 0, 0, 0.42) 78%, transparent),
-            radial-gradient(circle at 28px 26px, rgba(0, 0, 0, 0.98), transparent 54px);
+            linear-gradient(135deg, rgba(0, 0, 0, 0.99), rgba(0, 0, 0, 0.96) 58%, rgba(0, 0, 0, 0.5) 80%, transparent),
+            radial-gradient(circle at 34px 32px, rgba(0, 0, 0, 0.99), transparent 66px);
           pointer-events: none;
         }
 
@@ -1062,12 +1117,12 @@ export default function AngkorPreviewPage() {
         .register-card {
           position: fixed;
           left: 50%;
-          top: 48%;
+          top: calc(env(safe-area-inset-top) + 58px);
           width: min(386px, calc(100vw - 44px));
-          max-height: min(620px, calc(100svh - 112px));
+          max-height: min(620px, calc(var(--app-vvh, 100svh) - 118px));
           overflow-y: auto;
           overscroll-behavior: contain;
-          transform: translate(-50%, -50%);
+          transform: translateX(-50%);
           display: grid;
           gap: 10px;
           padding: 15px;
@@ -1245,14 +1300,14 @@ export default function AngkorPreviewPage() {
         }
 
         .free-preview-card {
-          min-height: auto;
-          aspect-ratio: 16 / 9;
+          min-height: var(--app-vvh, 100svh);
+          aspect-ratio: auto;
           border: 0;
         }
 
         .free-preview-card.tone-book,
         .free-preview-card.tone-book-dark {
-          aspect-ratio: 4 / 5;
+          aspect-ratio: auto;
         }
 
         .free-preview-card img {
