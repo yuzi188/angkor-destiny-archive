@@ -247,6 +247,8 @@ const analysisSequence = [
   },
 ];
 
+const analysisWaitingVideo = "06-waiting-train-transition.mp4";
+
 function IntroSequence({ muted, onDone }: { muted: boolean; onDone: () => void }) {
   const [index, setIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
@@ -331,9 +333,9 @@ function AnalysisSequence({
   return (
     <section className={`video-panel analysis-sequence ${transitioning ? "is-transitioning" : ""}`}>
       <video
-        key={inLoop ? "07-waiting-watch-loop.mp4" : current.src}
+        key={inLoop ? analysisWaitingVideo : current.src}
         ref={ref}
-        src={`${video}${inLoop ? "07-waiting-watch-loop.mp4" : current.src}`}
+        src={`${video}${inLoop ? analysisWaitingVideo : current.src}`}
         autoPlay
         muted={muted}
         playsInline
@@ -365,7 +367,7 @@ function AnalysisSequence({
       />
       {!inLoop && next ? <video className="preload-video" src={`${video}${next.src}`} preload="auto" muted /> : null}
       {!inLoop && index === analysisSequence.length - 1 ? (
-        <video className="preload-video" src={`${video}07-waiting-watch-loop.mp4`} preload="auto" muted />
+        <video className="preload-video" src={`${video}${analysisWaitingVideo}`} preload="auto" muted />
       ) : null}
       <div className="video-transition-shade" />
       <div className="video-caption">
@@ -927,21 +929,13 @@ export default function AngkorPreviewPage() {
           background: #000;
           box-shadow: none;
           pointer-events: none;
+          transform: translate(-26px, -18px) scale(1.13);
+          transform-origin: center center;
         }
 
-        .video-panel::before,
-        .cover-panel::before {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          z-index: 2;
-          width: 150px;
-          height: 106px;
-          background:
-            linear-gradient(135deg, rgba(0, 0, 0, 0.99), rgba(0, 0, 0, 0.96) 58%, rgba(0, 0, 0, 0.5) 80%, transparent),
-            radial-gradient(circle at 34px 32px, rgba(0, 0, 0, 0.99), transparent 66px);
-          pointer-events: none;
+        .cover-panel img {
+          transform: translate(-24px, -16px) scale(1.12);
+          transform-origin: center center;
         }
 
         .preload-video {
@@ -1117,20 +1111,21 @@ export default function AngkorPreviewPage() {
         .register-card {
           position: fixed;
           left: 50%;
-          top: calc(env(safe-area-inset-top) + 58px);
+          top: auto;
+          bottom: calc(env(safe-area-inset-bottom) + 78px);
           width: min(386px, calc(100vw - 44px));
-          max-height: min(620px, calc(var(--app-vvh, 100svh) - 118px));
+          max-height: min(520px, calc(var(--app-vvh, 100svh) - 150px));
           overflow-y: auto;
           overscroll-behavior: contain;
           transform: translateX(-50%);
           display: grid;
           gap: 10px;
-          padding: 15px;
+          padding: 14px;
           border: 1px solid rgba(216, 179, 109, 0.34);
           border-radius: 8px;
-          background: rgba(5, 6, 7, 0.62);
-          backdrop-filter: blur(12px);
-          box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+          background: rgba(5, 6, 7, 0.5);
+          backdrop-filter: blur(8px);
+          box-shadow: 0 16px 46px rgba(0, 0, 0, 0.34);
           -webkit-overflow-scrolling: touch;
         }
 
@@ -1153,7 +1148,7 @@ export default function AngkorPreviewPage() {
           width: 100%;
           border: 1px solid rgba(255, 246, 234, 0.2);
           border-radius: 7px;
-          background: rgba(6, 8, 9, 0.76);
+          background: rgba(6, 8, 9, 0.68);
           color: #fff6ea;
           padding: 10px 11px;
           font: 800 16px/1.35 "Noto Serif TC", serif;
