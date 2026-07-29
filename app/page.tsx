@@ -249,8 +249,19 @@ const analysisSequence = [
 
 const analysisWaitingVideo = "07-waiting-watch-loop.mp4";
 
-function IntroSequence({ muted, onDone }: { muted: boolean; onDone: () => void }) {
-  const [index, setIndex] = useState(0);
+function IntroSequence({
+  muted,
+  index,
+  onIndexChange,
+  onProgress,
+  onDone,
+}: {
+  muted: boolean;
+  index: number;
+  onIndexChange: (index: number) => void;
+  onProgress: (progress: number) => void;
+  onDone: () => void;
+}) {
   const [transitioning, setTransitioning] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
   const current = introSequence[index];
@@ -261,7 +272,8 @@ function IntroSequence({ muted, onDone }: { muted: boolean; onDone: () => void }
     if (index < introSequence.length - 1) {
       setTransitioning(true);
       window.setTimeout(() => {
-        setIndex(index + 1);
+        onIndexChange(index + 1);
+        onProgress(0);
         setTransitioning(false);
       }, 650);
       return;
@@ -273,8 +285,9 @@ function IntroSequence({ muted, onDone }: { muted: boolean; onDone: () => void }
     const el = ref.current;
     if (!el) return;
     el.currentTime = 0;
+    onProgress(0);
     void el.play().catch(() => {});
-  }, [index]);
+  }, [index, onProgress]);
 
   return (
     <section className={`video-panel intro-sequence ${transitioning ? "is-transitioning" : ""}`}>
@@ -289,8 +302,12 @@ function IntroSequence({ muted, onDone }: { muted: boolean; onDone: () => void }
         controlsList="nodownload noplaybackrate noremoteplayback"
         disablePictureInPicture
         onTimeUpdate={(event) => {
+          const el = event.currentTarget;
           const cutoff = introCutoffs[index];
-          if (cutoff && event.currentTarget.currentTime >= cutoff) {
+          const duration = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : cutoff || 1;
+          const segmentDuration = cutoff || duration;
+          onProgress(Math.min(el.currentTime / segmentDuration, 1));
+          if (cutoff && el.currentTime >= cutoff) {
             goNext();
           }
         }}
@@ -310,13 +327,18 @@ function IntroSequence({ muted, onDone }: { muted: boolean; onDone: () => void }
 function AnalysisSequence({
   muted,
   resultReady,
+  index,
+  onIndexChange,
+  onProgress,
   onDone,
 }: {
   muted: boolean;
   resultReady: boolean;
+  index: number;
+  onIndexChange: (index: number) => void;
+  onProgress: (progress: number) => void;
   onDone: () => void;
 }) {
-  const [index, setIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
   const current = analysisSequence[index];
@@ -327,11 +349,16 @@ function AnalysisSequence({
     const el = ref.current;
     if (!el) return;
     el.currentTime = 0;
+    onProgress(0);
     void el.play().catch(() => {});
-  }, [index]);
+  }, [index, onProgress]);
 
   return (
-    <section className={`video-panel analysis-sequence ${transitioning ? "is-transitioning" : ""}`}>
+    <section
+      className={`video-panel analysis-sequence ${transitioning ? "is-transitioning" : ""} ${
+        inLoop && resultReady ? "is-ready" : ""
+      }`}
+    >
       <video
         key={inLoop ? analysisWaitingVideo : current.src}
         ref={ref}
@@ -343,11 +370,18 @@ function AnalysisSequence({
         preload="auto"
         controlsList="nodownload noplaybackrate noremoteplayback"
         disablePictureInPicture
+        onTimeUpdate={(event) => {
+          const el = event.currentTarget;
+          const duration = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 10;
+          const progress = Math.min(el.currentTime / duration, 1);
+          onProgress(inLoop && !resultReady ? Math.min(progress, 0.95) : progress);
+        }}
         onEnded={() => {
           if (!inLoop && index < analysisSequence.length - 1) {
             setTransitioning(true);
             window.setTimeout(() => {
-              setIndex(index + 1);
+              onIndexChange(index + 1);
+              onProgress(0);
               setTransitioning(false);
             }, 650);
             return;
@@ -355,13 +389,11 @@ function AnalysisSequence({
           if (!inLoop) {
             setTransitioning(true);
             window.setTimeout(() => {
-              setIndex(analysisSequence.length);
+              onIndexChange(analysisSequence.length);
+              onProgress(0);
               setTransitioning(false);
             }, 650);
             return;
-          }
-          if (resultReady) {
-            onDone();
           }
         }}
       />
@@ -379,6 +411,11 @@ function AnalysisSequence({
             : current.note}
         </p>
       </div>
+      {inLoop && resultReady ? (
+        <button className="analysis-ready-button" type="button" onClick={onDone}>
+          翻開第一頁
+        </button>
+      ) : null}
     </section>
   );
 }
@@ -392,6 +429,9 @@ export default function AngkorPreviewPage() {
   const [analysisDone, setAnalysisDone] = useState(false);
   const [resultReady, setResultReady] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [introIndex, setIntroIndex] = useState(0);
+  const [analysisIndex, setAnalysisIndex] = useState(0);
+  const [videoProgress, setVideoProgress] = useState(0);
   const [form, setForm] = useState({
     name: "",
     birth: "",
@@ -448,6 +488,8 @@ export default function AngkorPreviewPage() {
     setAnalysisTransitioning(true);
     setAnalysisDone(false);
     setResultReady(false);
+    setAnalysisIndex(0);
+    setVideoProgress(0);
     window.setTimeout(() => {
       setAnalysisStarted(true);
       setAnalysisTransitioning(false);
@@ -482,17 +524,21 @@ export default function AngkorPreviewPage() {
   }
 
 
+  const introProgress = Math.min(1, (introIndex + videoProgress) / Math.max(1, introSequence.length));
+  const analysisProgress = Math.min(
+    1,
+    (Math.min(analysisIndex, analysisSequence.length) + videoProgress) / Math.max(1, analysisSequence.length + 1)
+  );
   const progressValue = !started
     ? 4
     : analysisDone
       ? 100
       : analysisStarted
-        ? resultReady
-          ? 84
-          : 72
+        ? 48 + analysisProgress * 40
         : introDone
           ? 44
-          : 18;
+          : 8 + introProgress * 36;
+  const progressPercent = Math.max(4, Math.min(100, progressValue));
 
   function resetJourney() {
     setStarted(false);
@@ -503,24 +549,52 @@ export default function AngkorPreviewPage() {
     setAnalysisDone(false);
     setResultReady(false);
     setSubmitError("");
+    setIntroIndex(0);
+    setAnalysisIndex(0);
+    setVideoProgress(0);
   }
 
   function goBackSegment() {
+    setSubmitError("");
+
+    if (analysisDone) {
+      setAnalysisDone(false);
+      setAnalysisStarted(true);
+      setAnalysisTransitioning(false);
+      setAnalysisIndex(analysisSequence.length);
+      setVideoProgress(0);
+      return;
+    }
+
     if (analysisStarted) {
+      if (analysisIndex > 0) {
+        setAnalysisIndex((current) => Math.max(0, current - 1));
+        setVideoProgress(0);
+        return;
+      }
       setAnalysisStarted(false);
       setAnalysisTransitioning(false);
       setAnalysisDone(false);
       setResultReady(false);
+      setVideoProgress(0);
       return;
     }
 
     if (introDone) {
       setIntroDone(false);
+      setIntroIndex(Math.max(0, introSequence.length - 1));
+      setVideoProgress(0);
       return;
     }
 
     if (started) {
+      if (introIndex > 0) {
+        setIntroIndex((current) => Math.max(0, current - 1));
+        setVideoProgress(0);
+        return;
+      }
       setStarted(false);
+      setVideoProgress(0);
     }
   }
   return (
@@ -538,7 +612,7 @@ export default function AngkorPreviewPage() {
             ‹
           </button>
           <div className="story-progress" aria-hidden="true">
-            <i style={{ width: `${progressValue}%` }} />
+            <i style={{ width: `${progressPercent}%` }} />
           </div>
           <button className="nav-icon" type="button" onClick={resetJourney} aria-label="回首頁">
             ⌂
@@ -557,6 +631,9 @@ export default function AngkorPreviewPage() {
                 setSoundEnabled(true);
                 setStarted(true);
                 setIntroDone(false);
+                setIntroIndex(0);
+                setAnalysisIndex(0);
+                setVideoProgress(0);
               }}
             >
               撿起車票
@@ -565,7 +642,18 @@ export default function AngkorPreviewPage() {
           </div>
         </Panel>
 
-        {started && !introDone ? <IntroSequence muted={!soundEnabled} onDone={() => setIntroDone(true)} /> : null}
+        {started && !introDone ? (
+          <IntroSequence
+            muted={!soundEnabled}
+            index={introIndex}
+            onIndexChange={setIntroIndex}
+            onProgress={setVideoProgress}
+            onDone={() => {
+              setIntroDone(true);
+              setVideoProgress(0);
+            }}
+          />
+        ) : null}
 
         <VideoPanel
           src="01-cover-opening.mp4"
@@ -679,7 +767,17 @@ export default function AngkorPreviewPage() {
         </Panel>
 
         {analysisStarted && !analysisDone ? (
-          <AnalysisSequence muted={!soundEnabled} resultReady={resultReady} onDone={() => setAnalysisDone(true)} />
+          <AnalysisSequence
+            muted={!soundEnabled}
+            resultReady={resultReady}
+            index={analysisIndex}
+            onIndexChange={setAnalysisIndex}
+            onProgress={setVideoProgress}
+            onDone={() => {
+              setAnalysisDone(true);
+              setVideoProgress(0);
+            }}
+          />
         ) : null}
 
         <Panel image="04-temple-station-awakens.png" className="storyboard-only">
@@ -992,6 +1090,26 @@ export default function AngkorPreviewPage() {
           font: 900 22px/1.48 "Noto Serif TC", serif;
           letter-spacing: 0;
           text-shadow: 0 4px 24px rgba(0, 0, 0, 0.95);
+        }
+
+        .analysis-sequence.is-ready .video-caption {
+          bottom: calc(86px + env(safe-area-inset-bottom));
+        }
+
+        .analysis-ready-button {
+          position: absolute;
+          z-index: 3;
+          left: 24px;
+          right: 24px;
+          bottom: calc(24px + env(safe-area-inset-bottom));
+          min-height: 56px;
+          border: 0;
+          border-radius: 12px;
+          color: #17110d;
+          background: linear-gradient(100deg, #8ecbf1, #d9c78e 48%, #e65b52);
+          font: 900 18px/1 "Noto Serif TC", serif;
+          letter-spacing: 0;
+          box-shadow: 0 18px 42px rgba(0, 0, 0, 0.46);
         }
 
         .continue-button {
@@ -1413,16 +1531,17 @@ export default function AngkorPreviewPage() {
         }
 
         .panel-11-c .free-preview-copy {
-          left: 46%;
-          right: 7%;
-          top: 14%;
+          left: 8%;
+          right: 8%;
+          top: 10%;
+          bottom: 10%;
           width: auto;
           max-width: none;
-          min-height: 48%;
+          min-height: 0;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: flex-start;
+          justify-content: center;
           text-align: center;
         }
 
@@ -1435,16 +1554,16 @@ export default function AngkorPreviewPage() {
         .panel-11-c .free-preview-copy h2 {
           max-width: 100%;
           color: #d8b36d;
-          font-size: clamp(24px, 6.8vw, 34px);
+          font-size: clamp(24px, 6.4vw, 32px);
           line-height: 1.16;
         }
 
         .panel-11-c .free-preview-copy p {
-          max-width: 92%;
-          margin-top: 14px;
+          max-width: min(72%, 520px);
+          margin-top: 12px;
           color: rgba(255, 246, 234, 0.94);
-          font-size: clamp(17px, 4.6vw, 23px);
-          line-height: 1.72;
+          font-size: clamp(16px, 4.3vw, 22px);
+          line-height: 1.64;
           text-shadow: 0 4px 18px rgba(0, 0, 0, 0.92);
         }
 
