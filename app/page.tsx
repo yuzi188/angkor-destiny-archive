@@ -71,7 +71,7 @@ const freePreviewPanels = [
     tone: "book",
   },
   {
-    image: "11-title-code-final.png",
+    image: "11-title-code.png",
     no: "11",
     kicker: "第三章",
     title: "命格暗號",
@@ -79,7 +79,7 @@ const freePreviewPanels = [
     tone: "title",
   },
   {
-    image: "11-story-symbol-final.png",
+    image: "11-story-symbol.png",
     no: "11-A",
     kicker: "符號浮現",
     title: "這不是一句安慰。",
@@ -718,7 +718,11 @@ export default function AngkorPreviewPage() {
         </Panel>
 
         {freePreviewPanels.map((panel) => (
-          <Panel key={panel.no} image={panel.image} className={`post-result free-preview-card tone-${panel.tone}`}>
+          <Panel
+            key={panel.no}
+            image={panel.image}
+            className={`post-result free-preview-card tone-${panel.tone} panel-${panel.no.toLowerCase()}`}
+          >
             <div className="free-preview-copy">
               <small>
                 {panel.no} / {panel.kicker}
@@ -1300,6 +1304,15 @@ export default function AngkorPreviewPage() {
           border: 0;
         }
 
+        .free-preview-card.tone-title,
+        .free-preview-card.tone-story,
+        .free-preview-card.tone-locked,
+        .free-preview-card.tone-locked-list,
+        .free-preview-card.tone-offer {
+          min-height: auto;
+          aspect-ratio: 16 / 9;
+        }
+
         .free-preview-card.tone-book,
         .free-preview-card.tone-book-dark {
           aspect-ratio: auto;
@@ -1344,6 +1357,44 @@ export default function AngkorPreviewPage() {
           text-shadow: 0 4px 28px rgba(0, 0, 0, 0.96);
         }
 
+        .free-preview-card.tone-title .free-preview-copy,
+        .free-preview-card.tone-story .free-preview-copy,
+        .free-preview-card.tone-locked .free-preview-copy,
+        .free-preview-card.tone-locked-list .free-preview-copy,
+        .free-preview-card.tone-offer .free-preview-copy {
+          left: 22px;
+          right: 22px;
+          bottom: 20px;
+          max-width: calc(100% - 44px);
+        }
+
+        .free-preview-card.tone-title .free-preview-copy small,
+        .free-preview-card.tone-story .free-preview-copy small,
+        .free-preview-card.tone-locked .free-preview-copy small,
+        .free-preview-card.tone-locked-list .free-preview-copy small,
+        .free-preview-card.tone-offer .free-preview-copy small {
+          font-size: 12px;
+        }
+
+        .free-preview-card.tone-title .free-preview-copy h2,
+        .free-preview-card.tone-story .free-preview-copy h2,
+        .free-preview-card.tone-locked .free-preview-copy h2,
+        .free-preview-card.tone-locked-list .free-preview-copy h2,
+        .free-preview-card.tone-offer .free-preview-copy h2 {
+          font-size: clamp(22px, 6.6vw, 34px);
+          line-height: 1.08;
+        }
+
+        .free-preview-card.tone-title .free-preview-copy p,
+        .free-preview-card.tone-story .free-preview-copy p,
+        .free-preview-card.tone-locked .free-preview-copy p,
+        .free-preview-card.tone-locked-list .free-preview-copy p,
+        .free-preview-card.tone-offer .free-preview-copy p {
+          margin-top: 8px;
+          font-size: clamp(13px, 3.8vw, 18px);
+          line-height: 1.4;
+        }
+
         .tone-book .free-preview-copy,
         .tone-book-dark .free-preview-copy,
         .tone-record .free-preview-copy {
@@ -1359,6 +1410,42 @@ export default function AngkorPreviewPage() {
         .tone-book-dark .free-preview-copy {
           color: rgba(255, 246, 234, 0.92);
           text-shadow: 0 4px 22px rgba(0, 0, 0, 0.9);
+        }
+
+        .panel-11-c .free-preview-copy {
+          left: 46%;
+          right: 7%;
+          top: 14%;
+          width: auto;
+          max-width: none;
+          min-height: 48%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          text-align: center;
+        }
+
+        .panel-11-c .free-preview-copy small {
+          margin-bottom: 10px;
+          color: #9c2923;
+          font-size: 13px;
+        }
+
+        .panel-11-c .free-preview-copy h2 {
+          max-width: 100%;
+          color: #d8b36d;
+          font-size: clamp(24px, 6.8vw, 34px);
+          line-height: 1.16;
+        }
+
+        .panel-11-c .free-preview-copy p {
+          max-width: 92%;
+          margin-top: 14px;
+          color: rgba(255, 246, 234, 0.94);
+          font-size: clamp(17px, 4.6vw, 23px);
+          line-height: 1.72;
+          text-shadow: 0 4px 18px rgba(0, 0, 0, 0.92);
         }
 
         .tone-record .free-preview-copy {
