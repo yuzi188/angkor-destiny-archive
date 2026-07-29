@@ -247,7 +247,7 @@ const analysisSequence = [
   },
 ];
 
-const analysisWaitingVideo = "06-waiting-train-transition.mp4";
+const analysisWaitingVideo = "07-waiting-watch-loop.mp4";
 
 function IntroSequence({ muted, onDone }: { muted: boolean; onDone: () => void }) {
   const [index, setIndex] = useState(0);
