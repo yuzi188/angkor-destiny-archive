@@ -7,7 +7,7 @@ const video = "/videos/angkor/";
 
 const freePreviewPanels = [
   {
-    image: "09-title-seen.png",
+    image: "09-title-seen-final.png",
     no: "09",
     kicker: "第一章",
     title: "被看見的那一面",
@@ -15,7 +15,7 @@ const freePreviewPanels = [
     tone: "title",
   },
   {
-    image: "09-story-open-book.png",
+    image: "09-story-open-book-final.png",
     no: "09-A",
     kicker: "翻頁",
     title: "第一頁，不是答案。",
@@ -23,7 +23,7 @@ const freePreviewPanels = [
     tone: "story",
   },
   {
-    image: "09-story-window-reflection.png",
+    image: "09-story-window-reflection-final.png",
     no: "09-B",
     kicker: "倒影",
     title: "是你一直避開的那一面。",
@@ -31,7 +31,7 @@ const freePreviewPanels = [
     tone: "story",
   },
   {
-    image: "09-book-result.png",
+    image: "09-book-result-final.png",
     no: "09-C",
     kicker: "書面分析",
     title: "第一頁｜被看見的那一面",
@@ -39,7 +39,7 @@ const freePreviewPanels = [
     tone: "book",
   },
   {
-    image: "10-title-repeat.png",
+    image: "10-title-repeat-final.png",
     no: "10",
     kicker: "第二章",
     title: "反覆出現的選擇",
@@ -47,7 +47,7 @@ const freePreviewPanels = [
     tone: "title",
   },
   {
-    image: "10-story-ticket-lines.png",
+    image: "10-story-ticket-lines-final.png",
     no: "10-A",
     kicker: "票孔發光",
     title: "你以為是新的問題。",
@@ -55,7 +55,7 @@ const freePreviewPanels = [
     tone: "story",
   },
   {
-    image: "10-story-loop-station.png",
+    image: "10-story-loop-station-final.png",
     no: "10-B",
     kicker: "迴圈車站",
     title: "你不是卡住。",
@@ -63,7 +63,7 @@ const freePreviewPanels = [
     tone: "story",
   },
   {
-    image: "10-book-result.png",
+    image: "10-book-result-final.png",
     no: "10-C",
     kicker: "書面分析",
     title: "第二頁｜反覆出現的選擇",
@@ -71,7 +71,7 @@ const freePreviewPanels = [
     tone: "book",
   },
   {
-    image: "11-title-code.png",
+    image: "11-title-code-final.png",
     no: "11",
     kicker: "第三章",
     title: "命格暗號",
@@ -79,7 +79,7 @@ const freePreviewPanels = [
     tone: "title",
   },
   {
-    image: "11-story-symbol.png",
+    image: "11-story-symbol-final.png",
     no: "11-A",
     kicker: "符號浮現",
     title: "這不是一句安慰。",
