@@ -1,6 +1,6 @@
 "use client";
 
-import { type FocusEvent, type FormEvent, useEffect, useRef, useState } from "react";
+import { type FocusEvent, type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
 const bg = "/storyboards/angkor/";
 const video = "/videos/angkor/";
@@ -249,6 +249,15 @@ const analysisSequence = [
 
 const analysisWaitingVideo = "07-waiting-watch-loop.mp4";
 
+function playInlineVideo(el: HTMLVideoElement) {
+  const play = () => {
+    void el.play().catch(() => {});
+  };
+
+  play();
+  window.setTimeout(play, 120);
+}
+
 function IntroSequence({
   muted,
   index,
@@ -267,7 +276,7 @@ function IntroSequence({
   const current = introSequence[index];
   const next = introSequence[index + 1];
 
-  function goNext() {
+  const goNext = useCallback(() => {
     if (transitioning) return;
     if (index < introSequence.length - 1) {
       setTransitioning(true);
@@ -279,20 +288,28 @@ function IntroSequence({
       return;
     }
     onDone();
-  }
+  }, [index, onDone, onIndexChange, onProgress, transitioning]);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     el.currentTime = 0;
     onProgress(0);
-    void el.play().catch(() => {});
+    playInlineVideo(el);
   }, [index, onProgress]);
+
+  useEffect(() => {
+    const cutoff = introCutoffs[index] || 15;
+    const timer = window.setTimeout(() => {
+      goNext();
+    }, (cutoff + 1.4) * 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [goNext, index]);
 
   return (
     <section className={`video-panel intro-sequence ${transitioning ? "is-transitioning" : ""}`}>
       <video
-        key={current.src}
         ref={ref}
         src={`${video}${current.src}`}
         autoPlay
@@ -312,6 +329,10 @@ function IntroSequence({
           }
         }}
         onEnded={() => {
+          goNext();
+        }}
+        onCanPlay={(event) => playInlineVideo(event.currentTarget)}
+        onError={() => {
           goNext();
         }}
       />
@@ -345,13 +366,32 @@ function AnalysisSequence({
   const inLoop = index >= analysisSequence.length;
   const next = analysisSequence[index + 1];
 
+  const goNext = useCallback(() => {
+    if (transitioning || inLoop) return;
+    setTransitioning(true);
+    window.setTimeout(() => {
+      onIndexChange(index < analysisSequence.length - 1 ? index + 1 : analysisSequence.length);
+      onProgress(0);
+      setTransitioning(false);
+    }, 650);
+  }, [inLoop, index, onIndexChange, onProgress, transitioning]);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     el.currentTime = 0;
     onProgress(0);
-    void el.play().catch(() => {});
+    playInlineVideo(el);
   }, [index, onProgress]);
+
+  useEffect(() => {
+    if (inLoop) return;
+    const timer = window.setTimeout(() => {
+      goNext();
+    }, 16500);
+
+    return () => window.clearTimeout(timer);
+  }, [goNext, inLoop, index]);
 
   return (
     <section
@@ -360,7 +400,6 @@ function AnalysisSequence({
       }`}
     >
       <video
-        key={inLoop ? analysisWaitingVideo : current.src}
         ref={ref}
         src={`${video}${inLoop ? analysisWaitingVideo : current.src}`}
         autoPlay
@@ -377,24 +416,11 @@ function AnalysisSequence({
           onProgress(inLoop && !resultReady ? Math.min(progress, 0.95) : progress);
         }}
         onEnded={() => {
-          if (!inLoop && index < analysisSequence.length - 1) {
-            setTransitioning(true);
-            window.setTimeout(() => {
-              onIndexChange(index + 1);
-              onProgress(0);
-              setTransitioning(false);
-            }, 650);
-            return;
-          }
-          if (!inLoop) {
-            setTransitioning(true);
-            window.setTimeout(() => {
-              onIndexChange(analysisSequence.length);
-              onProgress(0);
-              setTransitioning(false);
-            }, 650);
-            return;
-          }
+          goNext();
+        }}
+        onCanPlay={(event) => playInlineVideo(event.currentTarget)}
+        onError={() => {
+          goNext();
         }}
       />
       {!inLoop && next ? <video className="preload-video" src={`${video}${next.src}`} preload="auto" muted /> : null}
