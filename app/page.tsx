@@ -145,9 +145,27 @@ const waitingLines = [
 ];
 
 const plans = [
-  { name: "Single Route", price: "US$39", desc: "核心問題、90 天提醒、一份行動處方" },
-  { name: "Transfer Set", price: "US$63", desc: "路線報告、職涯合作班次、關係避雷時刻" },
-  { name: "Full Midnight Archive", price: "US$79", desc: "完整人生路線、金錢與關係分岔、30 天轉站清單" },
+  {
+    name: "Single Route",
+    badge: "單程",
+    price: "US$39",
+    previousPrice: "US$16.8",
+    desc: "核心問題、90 天提醒、一份行動處方",
+  },
+  {
+    name: "Transfer Set",
+    badge: "推薦",
+    price: "US$63",
+    previousPrice: "US$28.6",
+    desc: "路線報告、職涯合作班次、關係避雷時刻",
+  },
+  {
+    name: "Full Midnight Archive",
+    badge: "完整",
+    price: "US$79",
+    previousPrice: "US$36.8",
+    desc: "完整人生路線、金錢與關係分岔、30 天轉站清單",
+  },
 ];
 
 function Panel({
@@ -455,6 +473,8 @@ export default function AngkorPreviewPage() {
   const [analysisDone, setAnalysisDone] = useState(false);
   const [resultReady, setResultReady] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [showPlanOptions, setShowPlanOptions] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(1);
   const [introIndex, setIntroIndex] = useState(0);
   const [analysisIndex, setAnalysisIndex] = useState(0);
   const [videoProgress, setVideoProgress] = useState(0);
@@ -475,7 +495,17 @@ export default function AngkorPreviewPage() {
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
 
   function updateForm(field: keyof typeof form, value: string) {
-    setForm((current) => ({ ...current, [field]: value }));
+    const digits = value.replace(/\D/g, "");
+    const nextValue =
+      field === "birth"
+        ? [digits.slice(0, 4), digits.slice(4, 6), digits.slice(6, 8)]
+            .filter(Boolean)
+            .join("/")
+        : field === "time"
+          ? [digits.slice(0, 2), digits.slice(2, 4)].filter(Boolean).join(":")
+          : value;
+
+    setForm((current) => ({ ...current, [field]: nextValue }));
   }
 
   function keepFieldInCard(event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -831,8 +861,8 @@ export default function AngkorPreviewPage() {
         <Panel image="04-clean-archive-book.png" className="waiting-panel storyboard-only">
           <div className="waiting-card">
             <small>08 / 等待循環</small>
-            <h2>等待 GPT 回傳資料</h2>
-            <p>這一幕會鎖在循環畫面。資料沒回來，就不進入下一段。</p>
+            <h2>等待檔案回傳</h2>
+            <p>資料還沒回來，畫面會停在這一段調度旅程。</p>
             <div className="waiting-lines">
               {waitingLines.map((line) => (
                 <span key={line}>{line}</span>
@@ -859,19 +889,58 @@ export default function AngkorPreviewPage() {
           </Panel>
         ))}
 
-        <Panel image="10-clean-plan-selection.png" className="post-result">
-          <div className="plan-copy">
-            <small>20 / 方案</small>
-            <h2>選擇你要打開的班次。</h2>
-            <div className="plans">
-              {plans.map((plan) => (
-                <article key={plan.name}>
-                  <h3>{plan.name}</h3>
-                  <p>{plan.desc}</p>
-                  <strong>{plan.price}</strong>
-                </article>
-              ))}
-            </div>
+        <Panel image="10-clean-plan-selection.png" className="post-result checkout-panel">
+          <div className={`plan-copy ${showPlanOptions ? "is-open" : ""}`}>
+            {showPlanOptions ? (
+              <>
+                <small>20 / 方案</small>
+                <h2>選擇你要打開的班次。</h2>
+                <div className="plans">
+                  {plans.map((plan, index) => (
+                    <button
+                      type="button"
+                      key={plan.name}
+                      className={index === selectedPlan ? "is-selected" : ""}
+                      onClick={() => setSelectedPlan(index)}
+                    >
+                      <span className="plan-badge">{plan.badge}</span>
+                      <span className="plan-main">
+                        <strong>{plan.name}</strong>
+                        <small>{plan.desc}</small>
+                        <span className="plan-price-row">
+                          <del>{plan.previousPrice}</del>
+                          <b>{plan.price}</b>
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div className="checkout-summary">
+                  <span>寄送信箱</span>
+                  <strong>{form.email || "尚未填寫"}</strong>
+                  <span>選擇方案</span>
+                  <strong>{plans[selectedPlan].name}</strong>
+                </div>
+                <div className="checkout-checks">
+                  <label><input type="checkbox" defaultChecked /> 我同意資料只用於產生本次班次表</label>
+                  <label><input type="checkbox" defaultChecked /> 我了解這是娛樂與自我探索內容</label>
+                  <label><input type="checkbox" defaultChecked /> 願意收到後續路線更新</label>
+                </div>
+              </>
+            ) : (
+              <div className="claim-report">
+                <small>20 / 完整報告</small>
+                <h2>後面的班次，已經封在這裡。</h2>
+                <p>領取完整報告後，Rin 會把尚未開封的頁面寄到你的信箱。</p>
+                <button
+                  type="button"
+                  className="checkout-action"
+                  onClick={() => setShowPlanOptions(true)}
+                >
+                  領取完整報告
+                </button>
+              </div>
+            )}
           </div>
         </Panel>
 
@@ -1665,50 +1734,175 @@ export default function AngkorPreviewPage() {
 
         .plan-copy {
           position: absolute;
-          inset: 54px 18px 30px;
+          inset: 32px 16px 28px;
           display: flex;
           flex-direction: column;
           justify-content: center;
           text-align: center;
-          text-shadow: 0 4px 26px rgba(0, 0, 0, 0.94);
+          color: #f7f0e5;
+          text-shadow: 0 2px 16px rgba(0, 0, 0, 0.72);
+        }
+
+        .plan-copy.is-open {
+          justify-content: flex-start;
+          overflow-y: auto;
+          padding: 12px 2px 20px;
+          scrollbar-width: none;
+        }
+
+        .plan-copy small {
+          color: #dfb95f;
+          font-weight: 800;
+          letter-spacing: 0.08em;
         }
 
         .plan-copy h2 {
-          margin-bottom: 18px;
-          color: #fff6ea;
-          font: 900 23px/1.25 Georgia, "Noto Serif TC", serif;
+          margin: 8px 0 16px;
+          color: #fff8ec;
+          font-size: clamp(27px, 7vw, 36px);
+          line-height: 1.16;
+        }
+
+        .claim-report {
+          display: grid;
+          gap: 14px;
+          place-items: center;
+          margin: auto 0;
+        }
+
+        .claim-report p {
+          max-width: 300px;
+          margin: 0;
+          color: rgba(247, 240, 229, 0.88);
+          font-size: 16px;
+          line-height: 1.6;
+        }
+
+        .checkout-action {
+          width: min(100%, 360px);
+          min-height: 58px;
+          border: 0;
+          border-radius: 8px;
+          color: #17120e;
+          background: linear-gradient(100deg, #93d3f6, #e9c36c 52%, #de5854);
+          font: inherit;
+          font-size: 18px;
+          font-weight: 900;
+          cursor: pointer;
         }
 
         .plans {
           display: grid;
           gap: 10px;
-        }
-
-        .plans article {
-          padding: 14px;
-          border: 1px solid rgba(216, 179, 109, 0.36);
-          border-radius: 8px;
-          background: rgba(5, 6, 7, 0.68);
           text-align: left;
         }
 
-        .plans h3 {
-          color: #fff6ea;
-          font: 900 17px/1.25 Georgia, "Noto Serif TC", serif;
+        .plans button {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          width: 100%;
+          padding: 14px;
+          border: 1px solid rgba(255, 239, 201, 0.25);
+          border-radius: 8px;
+          color: inherit;
+          background: rgba(16, 19, 19, 0.9);
+          text-align: left;
+          font: inherit;
+          cursor: pointer;
         }
 
-        .plans p {
-          margin-top: 6px;
-          color: rgba(255, 246, 234, 0.68);
-          font-size: 12px;
-          line-height: 1.45;
+        .plans button.is-selected {
+          border-color: #e55756;
+          background: rgba(78, 27, 30, 0.7);
         }
 
-        .plans strong {
-          display: block;
-          margin-top: 8px;
-          color: #d8b36d;
+        .plan-badge {
+          flex: 0 0 auto;
+          padding: 8px 10px;
+          border-radius: 7px;
+          color: #ffe189;
+          background: rgba(198, 156, 67, 0.16);
+          font-size: 14px;
+          font-weight: 800;
+        }
+
+        .plan-main {
+          display: grid;
+          gap: 4px;
+          min-width: 0;
+        }
+
+        .plan-main > strong {
+          color: #fff8ec;
           font-size: 18px;
+        }
+
+        .plan-main > small {
+          overflow: hidden;
+          color: rgba(247, 240, 229, 0.74);
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 0;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .plan-price-row {
+          display: flex;
+          gap: 8px;
+          align-items: baseline;
+          color: #fff7e8;
+        }
+
+        .plan-price-row del {
+          color: rgba(255, 247, 232, 0.42);
+          font-size: 14px;
+        }
+
+        .plan-price-row b {
+          color: #fff5e4;
+          font-size: 19px;
+        }
+
+        .checkout-summary {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 8px 14px;
+          margin-top: 14px;
+          padding: 14px;
+          border-radius: 8px;
+          background: rgba(4, 7, 7, 0.72);
+          text-align: left;
+        }
+
+        .checkout-summary span {
+          color: rgba(247, 240, 229, 0.68);
+        }
+
+        .checkout-summary strong {
+          color: #fff8ec;
+        }
+
+        .checkout-checks {
+          display: grid;
+          gap: 9px;
+          margin-top: 14px;
+          text-align: left;
+        }
+
+        .checkout-checks label {
+          display: flex;
+          gap: 10px;
+          align-items: flex-start;
+          color: rgba(247, 240, 229, 0.86);
+          font-size: 14px;
+          line-height: 1.35;
+        }
+
+        .checkout-checks input {
+          accent-color: #87cdf4;
+          margin-top: 2px;
         }
 
         .book-single-copy {
